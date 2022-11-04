@@ -1,20 +1,32 @@
-#import visa
+import visa
 from numpy import arrange
 import pyvisa
+import matplotlib as plt
 
 V_start, V_max, V_min = 0, 30, -30
 step = 0.5
 V_plus = arrange(V_start, V_max, step)  #Array of positive voltages
 V_minus = arrange(V_min, V_start, step)  #Array of negative voltages
+waveform = [] #Signal from the oscilloscope
+time_dom = [] #x axes
+amplitude = [] #y axes
+max_amp = [] #Meanings of the amplitudes of the pulses
 
 class oscil(object):
     if __name__ == '__main__':
         rm = pyvisa.ResourceManager()
         myOsc = rm.open_resource("TCPIP0::192.168.1.10::inst0::INSTR") #Для корректной работы надо отключать защиту осцила
     print(myOsc.query("*IDN?"))
-    #def dataExtraction (self):
+    def dataExtraction (self):
+        oscil.myOsc.querry (":WAVeform:DATA?")
 
+    def DefSetup (self):
+        oscil.myOsc.querry (":WAVEFORM:SOURCE CHANNEL1")
+        oscil.myOsc.querry (":WAVEFORM:FORMAT WORD")
+        oscil.myOsc.querry (":SYSTEM:HEADER OFF")
+        return waveform
     pass
+
 
 class PURigol (object):
     if __name__ == '__main__':
@@ -44,5 +56,12 @@ class PURigol (object):
 
     pass
 
+def AmpMeas (waveform):
+    time, amplitude = np.split (waveform, 2)
 
+    return res
+
+#Picture of the waveform from the oscilloscope
+# plt.plot (t, amplitude)
+# plt.grid (True)
 
