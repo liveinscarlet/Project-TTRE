@@ -1,11 +1,12 @@
-from numpy import arrange
+from numpy import arange
 import pyvisa
+from pyvisa import query
 import matplotlib as plt
 
 V_start, V_max, V_min = 0, 30, -30
 step = 0.5
-V_plus = arrange(V_start, V_max, step)  #Array of positive voltages
-V_minus = arrange(V_min, V_start, step)  #Array of negative voltages
+V_plus = arange(V_start, V_max, step)  #Array of positive voltages
+V_minus = arange(V_min, V_start, step)  #Array of negative voltages
 waveform = [] #Signal from the oscilloscope
 time_dom = [] #x axes
 amplitude = [] #y axes
@@ -14,22 +15,23 @@ max_amp = [] #Meanings of the amplitudes of the pulses
 class oscil(object):
     if __name__ == '__main__':
         rm = pyvisa.ResourceManager()
-        myOsc = rm.open_resource("TCPIP0::192.168.1.10::inst0::INSTR") #Для корректной работы надо отключать защиту осцила
+        rm.list_resources()
+        myOsc = rm.open_resource('TCPIP0::192.168.5::inst0::INSTR') #Для корректной работы надо отключать защиту осцила
     print(myOsc.query("*IDN?"))
     def dataExtraction (self):
-        oscil.myOsc.query (":WAVeform:DATA?")
+        oscil.myOsc.query(":WAVeform:DATA?")
 
     def DefSetup (self):
-        oscil.myOsc.query (":WAVEFORM:SOURCE CHANNEL1")
-        oscil.myOsc.query (":WAVEFORM:FORMAT WORD")
-        oscil.myOsc.query (":SYSTEM:HEADER OFF")
+        oscil.myOsc.query(":WAVEFORM:SOURCE CHANNEL1")
+        oscil.myOsc.query(":WAVEFORM:FORMAT WORD")
+        oscil.myOsc.query(":SYSTEM:HEADER OFF")
         return waveform
     pass
 
 class PURigol (object):
     if __name__ == '__main__':
         rm = pyvisa.ResourceManager()
-        myPU = rm.open_resource("TCPIP0::192.168.1.10::inst0::INSTR") #Узнать IP БП и поменять код соответственно
+        myPU = rm.open_resource("TCPIP0::192.168.1.227::inst0::INSTR")
     print (myPU.query("*IDN?"))
 
     def Deafult_Setup(self):
@@ -63,3 +65,8 @@ def AmpMeas (waveform):
 # plt.plot (t, amplitude)
 # plt.grid (True)
 
+#3D graph for voltages
+fig0 = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
+ax.plot_surface(x, y, z, cmap='inferno')
+ax.legend()
