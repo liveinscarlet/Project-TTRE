@@ -14,28 +14,38 @@ amplitude = [] #y axes
 max_amp = [] #Meanings of the amplitudes of the pulses
 low_width = [] #Array of pulses width
 
-class oscil(object):
-    if __name__ == '__main__':
-        rm = pyvisa.ResourceManager()
-        rm.list_resources()
-        myOsc = rm.open_resource('TCPIP0::192.168.1.5::inst0::INSTR') #Для корректной работы надо отключать защиту осцила
-    print(myOsc.query("*IDN?"))
-    def dataExtraction (self):
-        oscil.myOsc.query(":WAVeform:DATA?")
-        Ampl = oscil.myOsc.query (":MEASURE:VPP?") #The amplitude of the pulse, positive
-        Width = oscil.myOsc.query ("MEASURE:PWIDTH?") #The width of the pulse, positive
+class OscilloscopeAgilent86100D(object):
+    def __init__(self,
+                 visa_manager: visa.ResourceManager,
+                 addr: str = 'TCPIP0::192.168.1.5::inst0::INSTR'):
+        myOsc = rm.open_resource(addr)  # Для корректной работы надо отключать защиту осцила
+        print(myOsc.query("*IDN?"))
+
+    def dataExtraction(self):
+        OscilloscopeAgilent86100D.myOsc.query(":WAVeform:DATA?")
+        Ampl = OscilloscopeAgilent86100D.myOsc.query(":MEASURE:VPP?") #The amplitude of the pulse, positive
+        Width = OscilloscopeAgilent86100D.myOsc.query("MEASURE:PWIDTH?") #The width of the pulse, positive
         return waveform, Ampl, Width
 
-    def DefSetup (self):
-        oscil.myOsc.query(":WAVEFORM:SOURCE CHANNEL1")
-        oscil.myOsc.query(":WAVEFORM:FORMAT WORD")
-        oscil.myOsc.query(":SYSTEM:HEADER OFF")
-    pass
+    def Reset(self):
+        OscilloscopeAgilent86100D.myOsc.write("*RST")
 
-class PURigol (object):
-    if __name__ == '__main__':
-        rm = pyvisa.ResourceManager()
-        myPU = rm.open_resource("TCPIP0::192.168.1.227::inst0::INSTR")
+    def DefSetup(self):
+        OscilloscopeAgilent86100D.myOsc.write("*RST")
+        OscilloscopeAgilent86100D.myOsc.write(":TIMEBASE:RANGE 10E-9") #Time range full scale 10ns
+        OscilloscopeAgilent86100D.myOsc.write(":CHANNEL1:RANGE 40") #Voltage range full scale 10
+        OscilloscopeAgilent86100D.myOsc.write(":WAVEFORM:SOURCE CHANNEL1")
+        OscilloscopeAgilent86100D.myOsc.write(":WAVEFORM:FORMAT WORD")
+        OscilloscopeAgilent86100D.myOsc.write(":SYSTEM:HEADER OFF")
+        OscilloscopeAgilent86100D.myOsc.write(":DIGITIZE CHANNEL1")
+        OscilloscopeAgilent86100D.myOsc.write(":CHANNEL1:OFFSET 0")
+        OscilloscopeAgilent86100D.myOsc.write(":CHANNEL1:PROBE 46 DEC") #Channel 1 attenuation 46 dB
+
+class PURigol(object):
+    def __init__(self,
+                 visa_manager: visa.ResourceManager,
+                 addr: str = 'TCPIP0::192.168.1.227::inst0::INSTR'):
+        myPU = rm.open_resource(addr)
     print (myPU.query("*IDN?"))
 
     def Deafult_Setup_CH1(self):
@@ -52,18 +62,17 @@ class PURigol (object):
         time.sleep(1)
         PURigol.myPU.write(":APPL CH2,0.01,0.01")
 
-    def Voltage_Change_CH1 (self, V1):
+    def Voltage_Change_CH1(self, V1):
         PURigol.myPU.write(":APPL CH1,V1,0.01")
 
-    def Voltage_Change_CH2 (self, V2):
+    def Voltage_Change_CH2(self, V2):
         PURigol.myPU.write(":APPL CH1,V2,0.01")
-    def End_of_Work (self):
+
+    def End_of_Work(self):
         PURigol.myPU.write(":OUTP CH1, OFF")
         PURigol.myPU.write(":OUTP CH2, OFF")
         PURigol.myPU.write (":OUTP:OCP:CLEAR CH1")
         PURigol.myPU.write (":OUTP:OCP:CLEAR CH2")
-
-    pass
 
 # def AmpMeas (waveform): #Программное измерение амплитуды
 #     time, amplitude = np.split (waveform, 2)
@@ -71,26 +80,28 @@ class PURigol (object):
 #     return res
 
 #The beginnig of the experiment
-#Preexperimental Setup
-Rigol = PURigol() #The name of the PU in the experiment
-Agilent = oscil() #The name of the osc in the experiment
-Rigol.Deafult_Setup_CH1()
-time.sleep(1) #Just in case
-Rigol.Deafult_Setup_CH2()
-Agilent.DefSetup()
+if __name__ == '__main__':
+    # Preexperimental Setup
+    rm = visa.ResourceManager()
+    Rigol = PURigol(rm, 'TCPIP0::192.168.1.227::inst0::INSTR')  # The name of the PU in the experiment
+    Agilent = OscilloscopeAgilent86100D(rm, 'TCPIP0::192.168.1.5::inst0::INSTR')  # The name of the osc in the experiment
+    Rigol.Deafult_Setup_CH1()
+    time.sleep(1)  # Just in case
+    Rigol.Deafult_Setup_CH2()
+    Agilent.DefSetup()
 
-#Voltage change
-for i in V_plus:
-    for j in V_minus:
-        Rigol.Voltage_Change_CH2(j)
+    # Voltage change
+    for i in V_plus:
+        for j in V_minus:
+            Rigol.Voltage_Change_CH2(j)
+            Agilent.dataExtraction()
+            j += 0.25
+        Rigol.Voltage_Change_CH1(i)
         Agilent.dataExtraction()
-        j += 0.25
-    Rigol.Voltage_Change_CH1(i)
-    Agilent.dataExtraction()
-    Rigol.Voltage_Change_CH2(0)
-    i += 0.25
+        Rigol.Voltage_Change_CH2(0)
+        i += 0.25
 
-Rigol.End_of_Work()
+    Rigol.End_of_Work()
 #The end of the experiment
 
 #Picture of the waveform from the oscilloscope
