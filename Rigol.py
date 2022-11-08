@@ -15,22 +15,23 @@ max_amp = [] #Meanings of the amplitudes of the pulses
 low_width = [] #Array of pulses width
 
 class oscil(object):
-    if __name__ == '__main__':
-        rm = pyvisa.ResourceManager()
-        rm.list_resources()
-        myOsc = rm.open_resource('TCPIP0::192.168.1.5::inst0::INSTR') #Для корректной работы надо отключать защиту осцила
-    print(myOsc.query("*IDN?"))
-    def dataExtraction (self):
+    def __init__(addr: str = 'TCPIP0::192.168.1.5::inst0::INSTR')
+        self.rm = pyvisa.ResourceManager()
+        self.rm.list_resources()
+        myOsc = rm.open_resource(addr) #Для корректной работы надо отключать защиту осцила
+        print(myOsc.query("*IDN?"))
+    
+    def dataExtraction(self):
         oscil.myOsc.query(":WAVeform:DATA?")
-        Ampl = oscil.myOsc.query (":MEASURE:VPP?") #The amplitude of the pulse, positive
-        Width = oscil.myOsc.query ("MEASURE:PWIDTH?") #The width of the pulse, positive
+        Ampl = oscil.myOsc.query(":MEASURE:VPP?") #The amplitude of the pulse, positive
+        Width = oscil.myOsc.query("MEASURE:PWIDTH?") #The width of the pulse, positive
         return waveform, Ampl, Width
 
-    def DefSetup (self):
+    def DefSetup(self):
         oscil.myOsc.query(":WAVEFORM:SOURCE CHANNEL1")
         oscil.myOsc.query(":WAVEFORM:FORMAT WORD")
         oscil.myOsc.query(":SYSTEM:HEADER OFF")
-    pass
+
 
 class PURigol (object):
     if __name__ == '__main__':
