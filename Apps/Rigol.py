@@ -6,7 +6,7 @@ import time
 
 class PURigol(object):
     def __init__(self,
-                 visa_manager: visa.ResourceManager,
+                 visa_manager: pyvisa.ResourceManager,
                  addr: str = 'TCPIP0::192.168.1.227::inst0::INSTR'):
         myPU = rm.open_resource(addr)
     print(myPU.query("*IDN?"))
