@@ -48,10 +48,13 @@ if __name__ == '__main__':
     preabmle = Agil.Preamble()
     preabmle = preabmle.split(sep=',')
     points = int(preabmle[2])
+
+    # The time array formation
     start_time = float(preabmle[12])
     time_range = float(preabmle[11])
     time_end = start_time+time_range
     time = np.linspace(start_time, time_end, points)
+
     waveform = Agil.dataExtraction()
     waveform = waveform.split(sep=',')
     waveform = [float(x) for x in waveform]
