@@ -18,8 +18,24 @@ class OscilloscopeAgilent86100D(object):
     def Preamble(self):
         return self.myOsc.query(":WAV:PRE?")
 
-    def dataExtraction(self):
+    def dataExtraction(self) -> str:
         return self.myOsc.query(":WAVeform:DATA?")
+
+    def GetYData(self, tr_num: int = 1) -> list[float]:
+        data_string = self.dataExtraction()
+        data_list = data_string.split(sep=',')
+        return [float(x) for x in data_list]
+
+    def GetXdata(self, tr_num: int = 1) -> list[float]:
+        preabmle = self.Preamble()
+        preabmle = preabmle.split(sep=',')
+        points = int(preabmle[2])
+
+        start_time = float(preabmle[12])
+        time_range = float(preabmle[11])
+        time_end = start_time + time_range
+
+        return list(np.linspace(start_time, time_end, points))
 
     def AmpWidth(self):
         Ampl = self.myOsc.query(":MEASURE:VPP?")  # The amplitude of the pulse, positive
@@ -30,15 +46,13 @@ class OscilloscopeAgilent86100D(object):
         self.myOsc.write("*RST")
 
     def DefSetup(self):
-        self.myOsc.write("*RST")
+        # self.myOsc.write("*RST")
         self.myOsc.write(":TIMEBASE:RANGE 10E-9")  # Time range full scale 10ns
         self.myOsc.write(":CHANNEL1:RANGE 40")  # Voltage range full scale 10
         self.myOsc.write(":WAVEFORM:SOURCE CHANNEL1")
-        # self.myOsc.write(":WAVEFORM:FORMAT BYTE")
         self.myOsc.write(":SYSTEM:HEADER OFF")
         self.myOsc.write(":CHANNEL1:OFFSET 0")
         self.myOsc.write(":WAVEFORM:FORMAT ASCII")
-        self.myOsc.write(":WAVEFORM:XYFORMAT")
         # self.myOsc.write(":CHANNEL1:PRlOBE 46 DEC")  # Channel 1 attenuation 46 dB
 
 if __name__ == '__main__':
