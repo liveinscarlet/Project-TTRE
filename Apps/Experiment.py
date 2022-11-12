@@ -47,22 +47,22 @@ class Experiment(object):
                 pass
         return (voltages, ampl, width)
 
-    # def experiment_end(self):
-    #     PURigol.End_of_Work()
-    #     OscilloscopeAgilent86100D.Reset()
-    #
-    # def pos_pulse_beg(waveform, ampl_plus, treshold_plus):
-    #     return pos_time_start
-    #
-    # def pos_pulse_end(waveform, ampl_plus, treshold_plus):
-    #     return pos_time_end
-    #
-    # def neg_pulse_beg(waveform):
-    #     return neg_time_start
+    def experiment_end(self):
+        PURigol.End_of_Work()
+        OscilloscopeAgilent86100D.Reset()
 
-    # def neg_pulse_end(waveform):
-    #     return neg_time_end
-    #
+    def pos_pulse_beg(self, waveform, ampl_plus, treshold_plus):
+        return pos_time_start
+
+    def pos_pulse_end(self, waveform, ampl_plus, treshold_plus):
+        return pos_time_end
+
+    def neg_pulse_beg(self, waveform):
+        return neg_time_start
+
+    def neg_pulse_end(self, waveform):
+        return neg_time_end
+
 if __name__ == "__main__":
     rm = pyvisa.ResourceManager()
     Rigol = PURigol(rm, 'TCPIP0::192.168.1.227::inst0::INSTR')  # The name of the PU in the experiment
