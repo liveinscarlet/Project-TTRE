@@ -43,7 +43,7 @@ class Experiment(object):
                 middle = 0.5*max(values)
                 k = 0
                 while k < len(values):
-                    if values(k)<middle:
+                    if values(k) < middle:
                         continue
                     else:
                         time_mid.append(values[k])
