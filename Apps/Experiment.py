@@ -1,4 +1,5 @@
 from numpy import arange
+import numpy as np
 import tkinter
 import pyvisa
 import time
@@ -13,7 +14,7 @@ pulse_width = []  # Array of pulses width
 
 
 class Experiment(object):
-    def __int__(self):
+    def __init__(self):
         rm = pyvisa.ResourceManager()
         Rigol = PURigol(rm, 'TCPIP0::192.168.1.227::inst0::INSTR')  # The name of the PU in the experiment
         Agilent = OscilloscopeAgilent86100D(rm, 'TCPIP0::192.168.1.5::inst0::INSTR')  # The name of the osc in the exp
@@ -23,18 +24,22 @@ class Experiment(object):
         Agilent.DefSetup()
 
     def ampl_width_map(self):
+        Rigol = PURigol(rm, 'TCPIP0::192.168.1.227::inst0::INSTR')  # The name of the PU in the experiment
+        Agilent = OscilloscopeAgilent86100D(rm, 'TCPIP0::192.168.1.5::inst0::INSTR')  # The name of the osc in the exp
         v_min = float(input('Voltage to begin'))
         v_max = float(input('Maximum voltage'))
         step = float(input('Step for voltages'))
-        ampl = []
+        size = (v_max - v_max)/step
+        ampl = np.zeros(size, size)
+        pulse_width = np.zeros(size, size)
         time_mid = []
         voltages = arange(v_min, v_max, step)
         for i in voltages:
-            PURigol.Voltage_Change_CH1(i)
+            Rigol.Voltage_Change_CH1(i)
             for j in voltages:
-                PURigol.Voltage_Change_CH2(j)
-                values = OscilloscopeAgilent86100D.GetYData()
-                ampl[i j] = max(values)
+                Rigol.Voltage_Change_CH2(j)
+                values = Agilent.GetYData()
+                ampl[i, j] = max(values)
                 middle = 0.5*max(values)
                 k = 0
                 while k < len(values):
@@ -43,7 +48,7 @@ class Experiment(object):
                     else:
                         time_mid.append(values[k])
                 width_pulse = time_mid[-1] - time_mid[0]
-                pulse_width[i j] = width_pulse
+                pulse_width[i, j] = width_pulse
                 pass
         return (voltages, ampl, width)
 
