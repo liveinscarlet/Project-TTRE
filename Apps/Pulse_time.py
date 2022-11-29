@@ -4,7 +4,7 @@ import tkinter
 import pyvisa
 import matplotlib as plt
 import time
-from AgilentDCAX import OscilloscopeAgilent86100D
+from AgilentDCAX import Oscilloscope_Agilent86100D
 from Rigol import PURigol
 
 waveform = []

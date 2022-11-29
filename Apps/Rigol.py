@@ -38,3 +38,4 @@ class PURigol(object):
         self.myPU.write(":OUTP CH2, OFF")
         self.myPU.write(":OUTP:OCP:CLEAR CH1")
         self.myPU.write(":OUTP:OCP:CLEAR CH2")
+

@@ -57,7 +57,7 @@ class OscilloscopeAgilent86100D(object):
 
 if __name__ == '__main__':
     rm = pyvisa.ResourceManager()
-    Agil = OscilloscopeAgilent86100D(rm, 'TCPIP0::192.168.1.5::inst0::INSTR')
+    Agil = Oscilloscope_Agilent86100D(rm, 'TCPIP0::192.168.1.5::inst0::INSTR')
     Agil.DefSetup()
     preabmle = Agil.Preamble()
     preabmle = preabmle.split(sep=',')
