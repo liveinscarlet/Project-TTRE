@@ -47,8 +47,8 @@ class OscilloscopeAgilent86100D(object):
 
     def DefSetup(self):
         # self.myOsc.write("*RST")
-        self.myOsc.write(":TIMEBASE:RANGE 10E-9")  # Time range full scale 10ns
-        self.myOsc.write(":CHANNEL1:RANGE 40")  # Voltage range full scale 10
+        self.myOsc.write(":TIMEBASE:RANGE 25E-9")  # Time range full scale 10ns
+        self.myOsc.write(":CHANNEL1:RANGE 10")  # Voltage range full scale 10
         self.myOsc.write(":WAVEFORM:SOURCE CHANNEL1")
         self.myOsc.write(":SYSTEM:HEADER OFF")
         self.myOsc.write(":CHANNEL1:OFFSET 0")
@@ -57,7 +57,7 @@ class OscilloscopeAgilent86100D(object):
 
 if __name__ == '__main__':
     rm = pyvisa.ResourceManager()
-    Agil = Oscilloscope_Agilent86100D(rm, 'TCPIP0::192.168.1.5::inst0::INSTR')
+    Agil = OscilloscopeAgilent86100D(rm, 'TCPIP0::192.168.1.5::inst0::INSTR')
     Agil.DefSetup()
     preabmle = Agil.Preamble()
     preabmle = preabmle.split(sep=',')
@@ -74,6 +74,6 @@ if __name__ == '__main__':
     waveform = [float(x) for x in waveform]
 
     plt.plot(time, waveform)
+    plt.grid(True)
     plt.show()
     plt.grid(True)
-    plt.ylim(-1, 1)

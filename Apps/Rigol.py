@@ -1,8 +1,32 @@
+from abc import abstractmethod, ABC
+
 from numpy import arange
 import numpy as np
 import pyvisa
 import matplotlib as plt
 import time
+
+# @ABC
+# class PowerUnit:
+#     def __init__(self,
+#                  visa_manager: pyvisa.ResourceManager,
+#                  addr: str):
+#         self.inst = visa_manager.open_resource(addr)
+#         self._idn = self.idn
+#
+#     @abstractmethod
+#     def reset(self):
+#         # Reset of the Power Unit
+#         pass
+#
+#     @property
+#     def idn(self) -> str:
+#         # Ask for IDN, check of the connection
+#         return self.inst.query('*IDN?')
+
+    # @Voltages
+    # def voltages(self):
+
 
 class PURigol(object):
     def __init__(self,
@@ -38,4 +62,5 @@ class PURigol(object):
         self.myPU.write(":OUTP CH2, OFF")
         self.myPU.write(":OUTP:OCP:CLEAR CH1")
         self.myPU.write(":OUTP:OCP:CLEAR CH2")
+
 
