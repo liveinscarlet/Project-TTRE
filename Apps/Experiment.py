@@ -20,11 +20,11 @@ class Experiment(object):
                  addr_osc: str = 'TCPIP0::192.168.1.5::inst0::INSTR'):
         self.rm = resource_manager
         self.pu = PURigol(self.rm, addr_pu)  # The name of the PU in the experiment
-        self.ocs = OscilloscopeAgilent86100D(rm, addr_osc)  # The name of the osc in the exp
+        self.ocs = OscilloscopeAgilent86100D(self.rm, addr_osc)  # The name of the osc in the exp
 
-        self.pu.Deafult_Setup_CH1()
-        self.pu.Deafult_Setup_CH2()
-        self.ocs.DefSetup()
+        self.pu.deafult_setup_ch1()
+        self.pu.deafult_setup_ch2()
+        self.ocs.def_setup()
 
     def ampl(self):
         ampl = self.ocs.GetYData()
@@ -34,21 +34,27 @@ class Experiment(object):
         time_pulse = self.ocs.GetXdata()
         return time_pulse
 
-    def voltage_meas(self,
+    def voltage_change(self,
                      v_start: float = 5,
                      v_stop: float = 25,
                      v_step: float = 0.5):
         size = (v_stop - v_start) / v_step
         ampl = np.zeros(size, size)
+        i, j = 0, 0
         voltages = arange(v_start, v_stop, v_step)
         for i in voltages:
-            self.pu.Voltage_Change_CH1(i)
+            self.pu.voltage_change_ch1(i)
             for j in voltages:
-                self.pu.Voltage_Change_CH2(j)
+                self.pu.voltage_change_ch2(j)
                 values = self.ocs.GetYData()
                 ampl[i, j] = max(values)
                 pass
         return voltages, ampl
+
+    @staticmethod
+    def voltage_meas(voltages):
+        volt = max(voltages)
+        return volt
 
     def time_meas(self,
                   time_pulse,
@@ -56,25 +62,41 @@ class Experiment(object):
                   threshold: float = 0.5):
         global time_start, time_end
         level = max(ampl_pulse) * threshold
-        for i in ampl_pulse:
+        ampl = np.array(ampl_pulse)
+        time = np.array(time_pulse)
+        for i in ampl:
             if i >= level:
-                time_start = time_pulse[ampl_pulse.index(i)]
-            break
-        ampl_pulse = ampl_pulse.reversed()
-        for j in ampl_pulse:
+                time_start = time[ampl_pulse.index(i)]
+                break
+        ampl = list(reversed(ampl_pulse))
+        for j in ampl:
             if j >= level:
-                time_end = time_pulse[ampl_pulse.index(j)]
-            break
+                time_end = time[ampl_pulse.index(j)]
+                break
         return time_start, time_end
 
     def experiment_end(self):
-        self.pu.End_of_Work()
+        self.pu.end_of_work()
         self.ocs.Reset()
 
 
 if __name__ == "__main__":
+    rm1 = pyvisa.ResourceManager()
+    rm2 = pyvisa.ResourceManager()
     rm = pyvisa.ResourceManager()
+    osc = OscilloscopeAgilent86100D(rm1, 'TCPIP0::192.168.1.5::inst0::INSTR')
+    pu = PURigol(rm2, 'TCPIP0::192.168.1.227::inst0::INSTR')
     exp = Experiment(rm)
-    check = np.array(2)
-    check = exp.time_meas(exp.ampl(), exp.time())
-    print(check)
+    time = exp.time()
+    ampl = exp.ampl()
+    max_amp = np.zeros(5)
+    voltages = np.linspace(1, 5, 5)
+    max_amp_full = np.array(5)
+    i, j = 0, 0
+    for i in voltages:
+        pu.voltage_change_ch1(i)
+        for j in voltages:
+            pu.voltage_change_ch2(j)
+            max_amp[int(j)-1] = max(ampl)
+        max_amp_full = max_amp_full.append(max_amp)
+    print(max_amp)

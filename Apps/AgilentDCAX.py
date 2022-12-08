@@ -42,10 +42,10 @@ class OscilloscopeAgilent86100D(object):
         Width = self.myOsc.query("MEASURE:PWIDTH?")  # The width of the pulse, positive
         return Ampl, Width
 
-    def Reset(self):
+    def reset(self):
         self.myOsc.write("*RST")
 
-    def DefSetup(self):
+    def def_setup(self):
         # self.myOsc.write("*RST")
         self.myOsc.write(":TIMEBASE:RANGE 25E-9")  # Time range full scale 10ns
         self.myOsc.write(":CHANNEL1:RANGE 10")  # Voltage range full scale 10
@@ -58,7 +58,7 @@ class OscilloscopeAgilent86100D(object):
 if __name__ == '__main__':
     rm = pyvisa.ResourceManager()
     Agil = OscilloscopeAgilent86100D(rm, 'TCPIP0::192.168.1.5::inst0::INSTR')
-    Agil.DefSetup()
+    Agil.def_setup()
     preabmle = Agil.Preamble()
     preabmle = preabmle.split(sep=',')
     points = int(preabmle[2])
@@ -72,6 +72,17 @@ if __name__ == '__main__':
     waveform = Agil.dataExtraction()
     waveform = waveform.split(sep=',')
     waveform = [float(x) for x in waveform]
+
+    level = max(waveform) * 0.1
+    for i in waveform:
+        if i >= level:
+            time_start = time[waveform.index(i)]
+        break
+    waveform = list(reversed(waveform))
+    for j in waveform:
+        if j >= level:
+            time_end = time[waveform.index(j)]
+        break
 
     plt.plot(time, waveform)
     plt.grid(True)
