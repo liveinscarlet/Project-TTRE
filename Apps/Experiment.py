@@ -1,10 +1,10 @@
 from numpy import arange
 import numpy as np
-import tkinter
 import pyvisa
 import time
 from AgilentDCAX import OscilloscopeAgilent86100D
 from Rigol import PURigol
+from DataProcessing import Plots
 
 waveform = []  # Signal from the oscilloscope
 time_dom = []  # x axes
@@ -87,16 +87,27 @@ if __name__ == "__main__":
     osc = OscilloscopeAgilent86100D(rm1, 'TCPIP0::192.168.1.5::inst0::INSTR')
     pu = PURigol(rm2, 'TCPIP0::192.168.1.227::inst0::INSTR')
     exp = Experiment(rm)
-    time = exp.time()
+    time_pulse = exp.time()
     ampl = exp.ampl()
-    max_amp = np.zeros(5)
     voltages = np.linspace(1, 5, 5)
     max_amp_full = np.array(5)
+    size_zer = (5, 5)
+    max_amp = np.zeros(size_zer)
+    pulse_width = np.zeros(size_zer)
     i, j = 0, 0
+
     for i in voltages:
         pu.voltage_change_ch1(i)
         for j in voltages:
             pu.voltage_change_ch2(j)
-            max_amp[int(j)-1] = max(ampl)
-        max_amp_full = max_amp_full.append(max_amp)
+            ampl = exp.ampl()
+            time.sleep(0.5)
+            time_imp = exp.time_meas(time_pulse, ampl)
+            max_amp[int(i)][int(j)] = max(ampl)
+            pulse_width[int(i)][int(j)] = time_imp
+        j = 0
+
     print(max_amp)
+    Plots.maps(voltages, voltages, max_amp)
+    Plots.maps(voltages, voltages, pulse_width)
+    exp.experiment_end()

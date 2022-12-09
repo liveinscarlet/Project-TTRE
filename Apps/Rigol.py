@@ -1,13 +1,8 @@
 from abc import abstractmethod, ABC
-
-# from numpy import
-import numpy as np
 import pyvisa
-import matplotlib as plt
 import time
 
 
-@ABC
 class PowerUnit(ABC):
     def __init__(self,
                  visa_manager: pyvisa.ResourceManager,
@@ -27,12 +22,12 @@ class PowerUnit(ABC):
 
     @abstractmethod
     def default_setup_ch1(self):
-        # Deafault setup of the first channel
+        # Default setup of the first channel
         pass
 
     @abstractmethod
     def default_setup_ch2(self):
-        # Deafault setup of the second channel
+        # Default setup of the second channel
         pass
 
     @abstractmethod
@@ -108,4 +103,3 @@ class PUGW_Instek(PowerUnit):
 
     def end_of_work(self):
         self.myPU.write(":ALLOUTOFF")
-
