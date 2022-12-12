@@ -1,9 +1,6 @@
 import matplotlib.pyplot as plt
-import numpy as np
 import pyvisa
-import time
 import numpy as np
-import numpy.typing as npt
 
 ampl = []
 i = 0
@@ -21,12 +18,12 @@ class OscilloscopeAgilent86100D(object):
     def dataExtraction(self) -> str:
         return self.myOsc.query(":WAVeform:DATA?")
 
-    def GetYData(self, tr_num: int = 1) -> list[float]:
+    def GetYData(self, tr_num: int = 1) -> list[float]: # Form array of amplitudes
         data_string = self.dataExtraction()
         data_list = data_string.split(sep=',')
         return [float(x) for x in data_list]
 
-    def GetXdata(self, tr_num: int = 1) -> list[float]:
+    def GetXdata(self, tr_num: int = 1) -> list[float]: # Form array of time
         preabmle = self.Preamble()
         preabmle = preabmle.split(sep=',')
         points = int(preabmle[2])
@@ -39,16 +36,25 @@ class OscilloscopeAgilent86100D(object):
 
     def AmpWidth(self):
         Ampl = self.myOsc.query(":MEASURE:VPP?")  # The amplitude of the pulse, positive
-        Width = self.myOsc.query("MEASURE:NWIDTH?")  # The width of the pulse, positive
+        Width = self.myOsc.query("MEASURE:PWIDTH?")  # The width of the pulse, positive
         return Ampl, Width
 
     def width(self):
         width = self.myOsc.query("MEASURE:PWIDTH?")  # The width of the pulse, positive
         return width
 
-
     def reset(self):
         self.myOsc.write("*RST")
+
+    def get_osc(self): # Method for getting waveform from the oscilloscope on the screen
+        plt.plot(self.GetYData(), self.GetXdata())
+        plt.grid(True)
+        plt.grid(b=True, which='minor')
+        plt.xlabel('Time, sec')
+        plt.ylabel('Amplitude, V')
+        plt.title('Waveform')
+        plt.show()
+
 
     def def_setup(self):
         # self.myOsc.write("*RST")

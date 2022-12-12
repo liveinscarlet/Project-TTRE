@@ -43,9 +43,9 @@ class Experiment(object):
         i, j = 0, 0
         voltages = arange(v_start, v_stop, v_step)
         for i in voltages:
-            self.pu.voltage_change_ch1(i)
+            self.pu.v_change_1(i)
             for j in voltages:
-                self.pu.voltage_change_ch2(j)
+                self.pu.v_change_2(j)
                 values = self.ocs.GetYData()
                 ampl[i, j] = max(values)
                 pass
@@ -97,9 +97,9 @@ if __name__ == "__main__":
     i, j = 0, 0
 
     for i in voltages:
-        pu.voltage_change_ch1(i)
+        pu.v_change_1(i)
         for j in voltages:
-            pu.voltage_change_ch2(j)
+            pu.v_change_2(j)
             ampl = exp.ampl()
             time.sleep(0.5)
             time_imp = exp.time_meas(time_pulse, ampl)

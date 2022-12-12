@@ -15,10 +15,11 @@ class PowerUnit(ABC):
         # Reset of the Power Unit
         pass
 
-    @property
+    @abstractmethod
     def idn(self) -> str:
         # Ask for IDN, check of the connection
-        return self.inst.query('*IDN?')
+        idn = self.inst.query('*IDN?')
+        return idn
 
     @abstractmethod
     def default_setup_ch1(self):
@@ -31,19 +32,24 @@ class PowerUnit(ABC):
         pass
 
     @abstractmethod
-    def voltage_change_ch1(self, V1):
+    def v_change_1(self, V1):
         # change of the voltage in channel 1
         pass
 
-    def voltage_change_ch2(self, V2):
+    @abstractmethod
+    def v_change_2(self, V2):
         # change of the voltage in channel 1
+        pass
+
+    @abstractmethod
+    def end_of_work(self):
+        # End of work of the PU
         pass
 
 
 class PURigol(PowerUnit):
-    def __init__(self,
-                 visa_manager: pyvisa.ResourceManager,
-                 addr: str = 'TCPIP0::192.168.1.227::inst0::INSTR'):
+    def __init__(self, visa_manager: pyvisa.ResourceManager, addr: str = 'TCPIP0::192.168.1.227::inst0::INSTR'):
+        super().__init__(visa_manager, addr)
         self.myPU = visa_manager.open_resource(addr)
         print(self.myPU.query("*IDN?"))
 
@@ -61,11 +67,11 @@ class PURigol(PowerUnit):
         time.sleep(1)
         self.myPU.write(":APPL CH2,0.01,0.01")
 
-    def voltage_change_ch1(self, V1):
+    def v_change_1(self, V1):
         self.myPU.write(f":APPL CH1,{V1},0.05")
         time.sleep(1)
 
-    def voltage_change_ch2(self, V2):
+    def v_change_2(self, V2):
         self.myPU.write(f":APPL CH2,{V2},0.05")
         time.sleep(1)
 
@@ -75,11 +81,13 @@ class PURigol(PowerUnit):
         self.myPU.write(":OUTP:OCP:CLEAR CH1")
         self.myPU.write(":OUTP:OCP:CLEAR CH2")
 
+    def reset(self):
+        self.myPU.write("*RST")
+
 
 class PUGW_Instek(PowerUnit):
-    def __init__(self,
-                 visa_manager: pyvisa.ResourceManager,
-                 addr: str = 'TCPIP0::192.168.1.227::inst0::INSTR'):  # Добавить в локальную сеть и установить IP
+    def __init__(self, visa_manager: pyvisa.ResourceManager, addr: str = 'TCPIP0::192.168.1.227::inst0::INSTR'):  # Добавить в локальную сеть и установить IP
+        super().__init__(visa_manager, addr)
         self.myPU = visa_manager.open_resource(addr)
         print(self.myPU.query("*IDN?"))
 
@@ -93,13 +101,16 @@ class PUGW_Instek(PowerUnit):
         self.myPU.write(":SOURCE1:VOLTAGE 0")
         self.myPU.write(":SOURCE1:CURRENT 0.01")
 
-    def voltage_change_ch1(self, V1):
+    def v_change_1(self, V1):
         self.myPU.write(f":SOURCE1:VOLTAGE {V1}")
         time.sleep(1)
 
-    def voltage_change_ch2(self, V2):
+    def v_change_2(self, V2):
         self.myPU.write(f":SOURCE1:VOLTAGE {V2}")
         time.sleep(1)
+
+    def reset(self):
+        self.myPU.write("*RST")
 
     def end_of_work(self):
         self.myPU.write(":ALLOUTOFF")
