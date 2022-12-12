@@ -1,5 +1,7 @@
 import pyvisa
 from tkinter import *
+from tkinter.ttk import *
+from ttkthemes import ThemedStyle
 from Rigol import PURigol, PUGW_Instek
 from Experiment import Experiment
 from AgilentDCAX import OscilloscopeAgilent86100D
@@ -14,11 +16,15 @@ rm = pyvisa.ResourceManager()
 # Rigol = PURigol(rm1)
 # GWInstek = PUGW_Instek(rm2)
 
-
+# The application design
 window = Tk()
 window.title("Измерение параметров СКИ")
-window.geometry('400x250')
+window.geometry("800x500")
+style = ThemedStyle(window)
+print(style.theme_names())
+style.set_theme("arc")
 
+# Buttons functions
 def PURRigol_on():
     Rigol.default_setup_ch1()
     Rigol.default_setup_ch2()
@@ -33,9 +39,10 @@ def Osc_on():
 btn_PURigol_on = Button(window, text="Включить Rigol", command=PURRigol_on)
 btn_GWInstek_on = Button(window, text="Включить GWInstek", command=GWInstek_on)
 btn_Osc_on = Button(window, text="Включить осциллограф", command=Osc_on)
-btn_PURigol_on.grid(column=0, row=0)
-btn_GWInstek_on.grid(column=0, row=1)
-btn_Osc_on.grid(column=0, row=2)
+btn_PURigol_on.grid(column=5000, row=0)
+btn_GWInstek_on.grid(column=5000, row=1)
+btn_Osc_on.grid(column=6000, row=2)
+
 
 window.mainloop()
 

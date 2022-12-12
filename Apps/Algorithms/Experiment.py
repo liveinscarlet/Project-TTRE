@@ -22,8 +22,8 @@ class Experiment(object):
         self.pu = PURigol(self.rm, addr_pu)  # The name of the PU in the experiment
         self.ocs = OscilloscopeAgilent86100D(self.rm, addr_osc)  # The name of the osc in the exp
 
-        self.pu.deafult_setup_ch1()
-        self.pu.deafult_setup_ch2()
+        self.pu.default_setup_ch1()
+        self.pu.default_setup_ch2()
         self.ocs.def_setup()
 
     def ampl(self):
@@ -89,9 +89,9 @@ if __name__ == "__main__":
     exp = Experiment(rm)
     time_pulse = exp.time()
     ampl = exp.ampl()
-    voltages = np.linspace(1, 5, 5)
+    voltages = np.linspace(1, 15, 16)
     max_amp_full = np.array(5)
-    size_zer = (5, 5)
+    size_zer = (16, 16)
     max_amp = np.zeros(size_zer)
     pulse_width = np.zeros(size_zer)
     i, j = 0, 0
@@ -103,11 +103,13 @@ if __name__ == "__main__":
             ampl = exp.ampl()
             time.sleep(0.5)
             time_imp = exp.time_meas(time_pulse, ampl)
-            max_amp[int(i)][int(j)] = max(ampl)
-            pulse_width[int(i)][int(j)] = time_imp
+            duration = osc.width()
+            max_amp[int(i)][int(j)] = min(ampl)
+            pulse_width[int(i)][int(j)] = duration
         j = 0
 
     print(max_amp)
+    print(pulse_width)
     Plots.maps(voltages, voltages, max_amp)
     Plots.maps(voltages, voltages, pulse_width)
-    exp.experiment_end()
+    # exp.experiment_end()
