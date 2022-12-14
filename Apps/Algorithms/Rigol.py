@@ -47,9 +47,9 @@ class PowerUnit(ABC):
         pass
 
 
-class PURigol(PowerUnit):
+class PURigol(object):
     def __init__(self, visa_manager: pyvisa.ResourceManager, addr: str = 'TCPIP0::192.168.1.227::inst0::INSTR'):
-        super().__init__(visa_manager, addr)
+        # super().__init__(visa_manager, addr)
         self.myPU = visa_manager.open_resource(addr)
         print(self.myPU.query("*IDN?"))
 
@@ -69,11 +69,11 @@ class PURigol(PowerUnit):
 
     def v_change_1(self, V1):
         self.myPU.write(f":APPL CH1,{V1},0.05")
-        time.sleep(0.5)
+        time.sleep(1)
 
     def v_change_2(self, V2):
         self.myPU.write(f":APPL CH2,{V2},0.05")
-        time.sleep(0.5)
+        time.sleep(1)
 
     def end_of_work(self):
         self.myPU.write(":OUTP CH1, OFF")

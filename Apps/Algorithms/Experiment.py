@@ -1,3 +1,4 @@
+import matplotlib.pyplot as plt
 from numpy import arange
 import numpy as np
 import pyvisa
@@ -89,9 +90,9 @@ if __name__ == "__main__":
     exp = Experiment(rm)
     time_pulse = exp.time()
     ampl = exp.ampl()
-    voltages = np.linspace(1, 15, 16)
+    voltages = np.arange(3, 28, 0.25)
     max_amp_full = np.array(5)
-    size_zer = (16, 16)
+    size_zer = (len(voltages)+1, len(voltages)+1)
     max_amp = np.zeros(size_zer)
     pulse_width = np.zeros(size_zer)
     i, j = 0, 0
@@ -101,15 +102,29 @@ if __name__ == "__main__":
         for j in voltages:
             pu.v_change_2(j)
             ampl = exp.ampl()
-            time.sleep(0.5)
             time_imp = exp.time_meas(time_pulse, ampl)
+            time.sleep(1)
             duration = osc.width()
             max_amp[int(i)][int(j)] = min(ampl)
             pulse_width[int(i)][int(j)] = duration
         j = 0
 
+    # Save data
+    np.savetxt("amplitudes_array.csv", max_amp, delimiter=",")
+    print(osc.width())
+
     print(max_amp)
     print(pulse_width)
-    Plots.maps(voltages, voltages, max_amp)
-    Plots.maps(voltages, voltages, pulse_width)
+    f = plt.figure()
+    plt.matshow(max_amp, cmap="magma")
+    plt.colorbar()
+    plt.xlim(3.5, 27.5)
+    plt.ylim(3.5, 27.5)
+    plt.xlabel("Voltage1, V")
+    plt.ylabel("Voltage2, V")
+    plt.title("Amplitudes of UWB-pulse")
+    plt.show()
+
+
+    # Plots.maps(voltages, voltages, pulse_width)
     # exp.experiment_end()
