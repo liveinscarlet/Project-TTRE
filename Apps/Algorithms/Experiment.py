@@ -63,23 +63,35 @@ class Experiment(object):
                   threshold: float = 0.5,
                   is_positive: bool = True):
         ampl = [x if is_positive else -x for x in ampl_pulse]
+        index_start = np.argmax(ampl)
+        index_stop = np.argmax(ampl)
         level = max(ampl) * threshold
         time = time_pulse
 
-        time_start = 0
-        for i, a in enumerate(ampl, start=0):
-            if a > level and time_start == 0:
-                time_start = time[i]
-                break
+        st = True
+        while st:
+            st = ampl[index_start] > level
+            index_start -= 1
 
-        rev_ampl = list(reversed(ampl))
-        time_stop = 0
-        for i, a in enumerate(rev_ampl, start=0):
-            if a > level and time_stop == 0:
-                time_stop = time[-i]
-                break
+        st = True
+        while st:
+            st = ampl[index_stop] > level
+            index_stop += 1
 
-        dur = time_stop - time_start
+        # time_start = 0
+        # for i, a in enumerate(ampl, start=0):
+        #     if a > level and time_start == 0:
+        #         time_start = time[i]
+        #         break
+        #
+        # rev_ampl = list(reversed(ampl))
+        # time_stop = 0
+        # for i, a in enumerate(rev_ampl, start=0):
+        #     if a > level and time_stop == 0:
+        #         time_stop = time[-i]
+        #         break
+
+        dur = time[index_stop] - time[index_start]
         return dur
 
     def experiment_end(self):
@@ -116,8 +128,8 @@ if __name__ == "__main__":
             max_amp[ind_i][ind_j] = min(ampl)
             pulse_width[ind_i][ind_j] = duration2
             print(f"Imp[{ind_i}][{ind_j}] on V1={i};V2={j} "
-                  f"have amp={max_amp[ind_i][ind_j]:.2f}V;"
-                  f"dur={pulse_width[ind_i][ind_j]*1e9:.2f}ns")
+                  f"have amp={max_amp[ind_i][ind_j]:.1f}V;"
+                  f"dur={pulse_width[ind_i][ind_j]*1e9:.3f}ns")
             ind_j += 1
         ind_j = 0
         ind_i += 1
