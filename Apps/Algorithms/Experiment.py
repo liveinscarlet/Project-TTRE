@@ -60,21 +60,27 @@ class Experiment(object):
     def time_meas(self,
                   time_pulse,
                   ampl_pulse,
-                  threshold: float = 0.5):
-        global time_start, time_end
-        level = max(ampl_pulse) * threshold
-        ampl = np.array(ampl_pulse)
-        time = np.array(time_pulse)
-        for i in ampl:
-            if i >= level:
-                time_start = time[ampl_pulse.index(i)]
+                  threshold: float = 0.5,
+                  is_positive: bool = True):
+        ampl = [x if is_positive else -x for x in ampl_pulse]
+        level = max(ampl) * threshold
+        time = time_pulse
+
+        time_start = 0
+        for i, a in enumerate(ampl, start=0):
+            if a > level and time_start == 0:
+                time_start = time[i]
                 break
-        ampl = list(reversed(ampl_pulse))
-        for j in ampl:
-            if j >= level:
-                time_end = time[ampl_pulse.index(j)]
+
+        rev_ampl = list(reversed(ampl))
+        time_stop = 0
+        for i, a in enumerate(rev_ampl, start=0):
+            if a > level and time_stop == 0:
+                time_stop = time[-i]
                 break
-        return time_start, time_end
+
+        dur = time_stop - time_start
+        return dur
 
     def experiment_end(self):
         self.pu.end_of_work()
@@ -90,38 +96,43 @@ if __name__ == "__main__":
     exp = Experiment(rm)
     time_pulse = exp.time()
     ampl = exp.ampl()
-    voltages = np.arange(3, 28, 0.25)
+    voltages = np.arange(3, 28, 0.5)
     max_amp_full = np.array(5)
     size_zer = (len(voltages)+1, len(voltages)+1)
     max_amp = np.zeros(size_zer)
     pulse_width = np.zeros(size_zer)
     i, j = 0, 0
 
+    ind_i = 0
+    ind_j = 0
     for i in voltages:
         pu.v_change_1(i)
         for j in voltages:
             pu.v_change_2(j)
-            ampl = exp.ampl()
-            time_imp = exp.time_meas(time_pulse, ampl)
             time.sleep(1)
-            duration = osc.width()
-            max_amp[int(i)][int(j)] = min(ampl)
-            pulse_width[int(i)][int(j)] = duration
-        j = 0
+            ampl = exp.ampl()
+            times = exp.time()
+            duration2 = exp.time_meas(times, ampl, is_positive=False)
+            max_amp[ind_i][ind_j] = min(ampl)
+            pulse_width[ind_i][ind_j] = duration2
+            print(f"Imp[{ind_i}][{ind_j}] on V1={i};V2={j} "
+                  f"have amp={max_amp[ind_i][ind_j]:.2f}V;"
+                  f"dur={pulse_width[ind_i][ind_j]*1e9:.2f}ns")
+            ind_j += 1
+        ind_j = 0
+        ind_i += 1
 
     # Save data
     np.savetxt("amplitudes_array.csv", max_amp, delimiter=",")
-    print(osc.width())
+    np.savetxt("width_array.csv", pulse_width, delimiter=",")
 
-    print(max_amp)
-    print(pulse_width)
     f = plt.figure()
     plt.matshow(max_amp, cmap="magma")
     plt.colorbar()
     plt.xlim(3.5, 27.5)
     plt.ylim(3.5, 27.5)
-    plt.xlabel("Voltage1, V")
-    plt.ylabel("Voltage2, V")
+    plt.xlabel("Voltage1, Vб накачка")
+    plt.ylabel("Voltage2, V, рассасывание")
     plt.title("Amplitudes of UWB-pulse")
     plt.show()
 
