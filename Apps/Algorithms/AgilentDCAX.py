@@ -57,14 +57,18 @@ class OscilloscopeAgilent86100D(object):
 
 
     def def_setup(self):
-        # self.myOsc.write("*RST")
+        self.myOsc.write("*RST")
         # self.myOsc.write(":TIMEBASE:RANGE 25E-9")  # Time range full scale 10ns
-        # self.myOsc.write(":CHANNEL1:RANGE 10")  # Voltage range full scale 10
-        # self.myOsc.write(":WAVEFORM:SOURCE CHANNEL1")
-        # self.myOsc.write(":SYSTEM:HEADER OFF")
-        # self.myOsc.write(":CHANNEL1:OFFSET 0")
+        self.myOsc.write(":CHANNEL1:RANGE 10")  # Voltage range full scale 10
+        self.myOsc.write(":WAVEFORM:SOURCE CHANNEL1")
+        self.myOsc.write(":SYSTEM:HEADER OFF")
+        self.myOsc.write(":CHANNEL1:OFFSET 0")
         self.myOsc.write(":WAVEFORM:FORMAT ASCII")
-        # self.myOsc.write(":CHANNEL1:PROBE 46 DEC")  # Channel 1 attenuation 46 dB
+        self.myOsc.write(":CHANNEL1:PROBE 46 DEC")  # Channel 1 attenuation 46 dB
+
+    def timebase_change(self, timemax_coord):
+        timebase = timemax_coord
+        self.myOsc.write(f":TIMEBASE:RANGE 25E-9")
 
 if __name__ == '__main__':
     rm = pyvisa.ResourceManager()

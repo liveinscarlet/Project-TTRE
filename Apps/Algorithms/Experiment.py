@@ -141,8 +141,6 @@ if __name__ == "__main__":
     f = plt.figure()
     plt.matshow(max_amp, cmap="magma")
     plt.colorbar()
-    plt.xlim(3.5, 27.5)
-    plt.ylim(3.5, 27.5)
     plt.xlabel("Voltage1, Vб накачка")
     plt.ylabel("Voltage2, V, рассасывание")
     plt.title("Amplitudes of UWB-pulse")
