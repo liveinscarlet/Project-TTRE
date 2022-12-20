@@ -47,7 +47,7 @@ class Plots(object):
 
 
 if __name__ == "__main__":
-    data = pd.read_csv('./amplitudes_array.csv', sep=r'\s*,\s*', header=0, encoding='utf8', engine='python')
+    data = pd.read_csv('./width_array.csv', sep=r'\s*,\s*', header=0, encoding='utf8', engine='python')
     z = data.to_numpy()
     x = np.arange(3, 28.5, 0.5)
     y = np.arange(3, 28, 0.5)

@@ -106,6 +106,7 @@ if __name__ == "__main__":
     osc = OscilloscopeAgilent86100D(rm1, 'TCPIP0::192.168.1.5::inst0::INSTR')
     pu = PURigol(rm2, 'TCPIP0::192.168.1.227::inst0::INSTR')
     exp = Experiment(rm)
+    osc.def_setup()
     time_pulse = exp.time()
     ampl = exp.ampl()
     voltages = np.arange(3, 28, 0.5)
@@ -113,6 +114,8 @@ if __name__ == "__main__":
     size_zer = (len(voltages)+1, len(voltages)+1)
     max_amp = np.zeros(size_zer)
     pulse_width = np.zeros(size_zer)
+    pulse_width_full01 = np.zeros(size_zer)
+    pulse_width_short07 = np.zeros(size_zer)
     i, j = 0, 0
 
     ind_i = 0
@@ -124,27 +127,39 @@ if __name__ == "__main__":
             time.sleep(1)
             ampl = exp.ampl()
             times = exp.time()
+            timemax_coordinate = times[ampl.index(min(ampl))]
+            if min(ampl) >= -0.5:
+                osc.def_setup()
+            else:
+                osc.timebase_change(timemax_coordinate)
             duration2 = exp.time_meas(times, ampl, is_positive=False)
             max_amp[ind_i][ind_j] = min(ampl)
             pulse_width[ind_i][ind_j] = duration2
+            pulse_width_full = exp.time_meas(times, ampl, 0.1, is_positive=False)
+            pulse_width_short = exp.time_meas(times, ampl, 0.7, is_positive=False)
+            pulse_width_full01[ind_i][ind_j] = pulse_width_full
+            pulse_width_short07[ind_i][ind_j] = pulse_width_short
+            np.savetxt(f"waveform_V1{i}_V2{j}.csv", ampl, delimiter=",")
+            np.savetxt(f"times_V1{i}_V2{j}.csv", times, delimiter=",")
             print(f"Imp[{ind_i}][{ind_j}] on V1={i};V2={j} "
                   f"have amp={max_amp[ind_i][ind_j]:.1f}V;"
-                  f"dur={pulse_width[ind_i][ind_j]*1e9:.3f}ns")
+                  f"dur={pulse_width[ind_i][ind_j]*1e9:.3f}ns; "
+                  f"dur full={pulse_width_full01[ind_i][ind_j]*1e9:.3f}ns; "
+                  f"dur short={pulse_width_short07[ind_i][ind_j]*1e9:.3f}ns; ")
             ind_j += 1
+        osc.def_setup()
         ind_j = 0
         ind_i += 1
 
     # Save data
     np.savetxt("amplitudes_array.csv", max_amp, delimiter=",")
     np.savetxt("width_array.csv", pulse_width, delimiter=",")
+    np.savetxt("pulse_width_full01.csv", pulse_width_full01, delimiter=",")
+    np.savetxt("pulse_width_short07.csv", pulse_width_short07, delimiter=",")
 
-    f = plt.figure()
-    plt.matshow(max_amp, cmap="magma")
-    plt.colorbar()
-    plt.xlabel("Voltage1, Vб накачка")
-    plt.ylabel("Voltage2, V, рассасывание")
-    plt.title("Amplitudes of UWB-pulse")
-    plt.show()
+
+    Plots.like_spectrogram(voltages, voltages, max_amp)
+    Plots.like_spectrogram(voltages, voltages, pulse_width)
 
 
     # Plots.maps(voltages, voltages, pulse_width)

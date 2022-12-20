@@ -57,55 +57,32 @@ class OscilloscopeAgilent86100D(object):
 
 
     def def_setup(self):
-        self.myOsc.write("*RST")
-        # self.myOsc.write(":TIMEBASE:RANGE 25E-9")  # Time range full scale 10ns
-        self.myOsc.write(":CHANNEL1:RANGE 10")  # Voltage range full scale 10
+        # self.myOsc.write("*RST")
+        self.myOsc.write(":TIMEBASE:RANGE 35E-9")  # Time range full scale 10ns
+        self.myOsc.write(":CHANNEL1:RANGE 80")  # Voltage range full scale 10
         self.myOsc.write(":WAVEFORM:SOURCE CHANNEL1")
         self.myOsc.write(":SYSTEM:HEADER OFF")
         self.myOsc.write(":CHANNEL1:OFFSET 0")
         self.myOsc.write(":WAVEFORM:FORMAT ASCII")
-        self.myOsc.write(":CHANNEL1:PROBE 46 DEC")  # Channel 1 attenuation 46 dB
+        self.myOsc.write(":CHANNEL1:PROBE 46 dB")  # Channel 1 attenuation 46 dB
+        self.myOsc.write(":TIMEBASE:DELAY 30E-9")
+        self.myOsc.write(":TIMEBASE:REFERENCE CENTER ")
 
     def timebase_change(self, timemax_coord):
-        timebase = timemax_coord
-        self.myOsc.write(f":TIMEBASE:RANGE 25E-9")
+        self.myOsc.write(":TIMEBASE:RANGE 2E-9")  # Time range full scale 10ns
+        self.myOsc.write(f":TIMEBASE:DELAY {timemax_coord + 0.5E-9}")
 
 if __name__ == '__main__':
     rm = pyvisa.ResourceManager()
     Agil = OscilloscopeAgilent86100D(rm, 'TCPIP0::192.168.1.5::inst0::INSTR')
     Agil.def_setup()
-    preabmle = Agil.Preamble()
-    preabmle = preabmle.split(sep=',')
-    points = int(preabmle[2])
 
-    # The time array formation
-    start_time = float(preabmle[12])
-    time_range = float(preabmle[11])
-    time_end = start_time+time_range
-    time = np.linspace(start_time, time_end, points)
-
-    waveform = Agil.dataExtraction()
-    waveform = waveform.split(sep=',')
-    waveform = [float(x) for x in waveform]
-
-    level = max(waveform) * 0.1
-    for i in waveform:
-        if i >= level:
-            time_start = time[waveform.index(i)]
-        break
-    waveform = list(reversed(waveform))
-    for j in waveform:
-        if j >= level:
-            time_end = time[waveform.index(j)]
-        break
-
-    plt.plot(time, waveform)
-    plt.grid(True)
-    plt.grid(b = True, which='minor')
-    plt.xlabel('Time, sec')
-    plt.ylabel('Amplitude, V')
-    plt.title('Waveform')
-    plt.savefig('waveform.png')
-    plt.show()
+    # plt.plot(time, waveform)
+    # plt.grid(True)
+    # plt.grid(b = True, which='minor')
+    # plt.xlabel('Time, sec')
+    # plt.ylabel('Amplitude, V')
+    # plt.title('Waveform')
+    # plt.show()
 
 
