@@ -4,7 +4,7 @@ import numpy as np
 import pyvisa
 import time
 from AgilentDCAX import OscilloscopeAgilent86100D
-from Rigol import PURigol
+from Rigol import PUGW_Instek
 from DataProcessing import Plots
 
 waveform = []  # Signal from the oscilloscope
@@ -17,15 +17,15 @@ pulse_width = []  # Array of pulses width
 class Experiment(object):
     def __init__(self,
                  resource_manager,
-                 addr_pu: str = 'TCPIP0::192.168.1.227::inst0::INSTR',
+                 addr_pu: str = 'TCPIP0::192.168.1.54::inst0::INSTR',
                  addr_osc: str = 'TCPIP0::192.168.1.5::inst0::INSTR'):
         self.rm = resource_manager
-        self.pu = PURigol(self.rm, addr_pu)  # The name of the PU in the experiment
+        self.pu = PUGW_Instek(self.rm, addr_pu)  # The name of the PU in the experiment
         self.ocs = OscilloscopeAgilent86100D(self.rm, addr_osc)  # The name of the osc in the exp
 
         self.pu.default_setup_ch1()
         self.pu.default_setup_ch2()
-        self.ocs.def_setup()
+        self.ocs.def_setup_ch2()
 
     def ampl(self):
         ampl = self.ocs.GetYData()
@@ -104,9 +104,9 @@ if __name__ == "__main__":
     rm2 = pyvisa.ResourceManager()
     rm = pyvisa.ResourceManager()
     osc = OscilloscopeAgilent86100D(rm1, 'TCPIP0::192.168.1.5::inst0::INSTR')
-    pu = PURigol(rm2, 'TCPIP0::192.168.1.227::inst0::INSTR')
+    pu = PUGW_Instek(rm2, 'TCPIP0::192.168.1.227::inst0::INSTR')
     exp = Experiment(rm)
-    osc.def_setup()
+    osc.def_setup_ch2()
     time_pulse = exp.time()
     ampl = exp.ampl()
     voltages = np.arange(5, 28, 0.3)
@@ -121,40 +121,52 @@ if __name__ == "__main__":
 
     ind_i = 0
     ind_j = 0
-    for i in voltages:
-        pu.v_change_1(i)
-        for j in voltages:
-            pu.v_change_2(j)
-            time.sleep(0.5)
-            ampl = exp.ampl()
-            times = exp.time()
-            timemax_coordinate = times[ampl.index(min(ampl))]
-            if min(ampl) >= -0.5:
-                osc.def_setup()
-            else:
-                osc.timebase_change(timemax_coordinate)
-            duration2 = exp.time_meas(times, ampl, is_positive=False)
-            max_amp[ind_i][ind_j] = min(ampl)
-            pulse_width[ind_i][ind_j] = duration2
-            pulse_width_full = exp.time_meas(times, ampl, 0.1, is_positive=False)
-            pulse_width_short = exp.time_meas(times, ampl, 0.7, is_positive=False)
-            pulse_width_full01[ind_i][ind_j] = pulse_width_full
-            pulse_width_short07[ind_i][ind_j] = pulse_width_short
-            np.savetxt(f"waveform_V1{i}_V2{j}.csv", ampl, delimiter=",")
-            np.savetxt(f"times_V1{i}_V2{j}.csv", times, delimiter=",")
-            print(f"Imp[{ind_i}][{ind_j}] on V1={i};V2={j} "
-                  f"have amp={max_amp[ind_i][ind_j]:.1f}V;"
-                  f"dur={pulse_width[ind_i][ind_j]*1e9:.3f}ns; "
-                  f"dur full={pulse_width_full01[ind_i][ind_j]*1e9:.3f}ns; "
-                  f"dur short={pulse_width_short07[ind_i][ind_j]*1e9:.3f}ns; ")
-            ind_j += 1
-        osc.def_setup()
-        ind_j = 0
-        ind_i += 1
+    k = 0
+    while k < 2:
+        for i in voltages:
+            pu.v_change_1(i)
+            for j in voltages:
+                pu.v_change_2(j)
+                time.sleep(0.5)
+                ampl = exp.ampl()
+                times = exp.time()
+                timemax_coordinate = times[ampl.index(min(ampl))]
+                if min(ampl) >= -0.5:
+                    osc.def_setup()
+                else:
+                    osc.timebase_change(timemax_coordinate)
+                duration2 = exp.time_meas(times, ampl, is_positive=False)
+                max_amp[ind_i][ind_j] = min(ampl)
+                pulse_width[ind_i][ind_j] = duration2
+                pulse_width_full = exp.time_meas(times, ampl, 0.1, is_positive=False)
+                pulse_width_short = exp.time_meas(times, ampl, 0.7, is_positive=False)
+                pulse_width_full01[ind_i][ind_j] = pulse_width_full
+                pulse_width_short07[ind_i][ind_j] = pulse_width_short
+                time_max_ampl[ind_i][ind_j] = timemax_coordinate
+                # np.savetxt(f"waveform_V1{i}_V2{j}.csv", ampl, delimiter=",")
+                # np.savetxt(f"times_V1{i}_V2{j}.csv", times, delimiter=",")
+                print(f"Imp[{ind_i}][{ind_j}] on V1={i};V2={j} "
+                      f"have amp={max_amp[ind_i][ind_j]:.1f}V;"
+                      f"dur={pulse_width[ind_i][ind_j]*1e9:.3f}ns; "
+                      f"dur full={pulse_width_full01[ind_i][ind_j]*1e9:.3f}ns; "
+                      f"dur short={pulse_width_short07[ind_i][ind_j]*1e9:.3f}ns; ")
+                # Plots.plot_waveform(times, ampl)
+                ind_j += 1
+            osc.def_setup_ch2()
+            ind_j = 0
+            ind_i += 1
 
-    # Save data
-    np.savetxt(f"amplitudes_array.csv", max_amp, delimiter=",")
-    np.savetxt(f"width_array.csv", pulse_width, delimiter=",")
-    np.savetxt(f"pulse_width_full01.csv", pulse_width_full01, delimiter=",")
-    np.savetxt(f"pulse_width_short07.csv", pulse_width_short07, delimiter=",")
-    np.savetxt(f"time_max_ampl.csv", time_max_ampl, delimiter=",")
+        # Save data
+        np.savetxt(f"positive_amplitudes_array{k}.csv", max_amp, delimiter=",")
+        np.savetxt(f"positive_width_array{k}.csv", pulse_width, delimiter=",")
+        np.savetxt(f"positive_pulse_width_full01{k}.csv", pulse_width_full01, delimiter=",")
+        np.savetxt(f"positive_pulse_width_short07{k}.csv", pulse_width_short07, delimiter=",")
+        np.savetxt(f"positive_time_max_ampl{k}.csv", time_max_ampl, delimiter=",")
+        k += 1
+
+    Plots.like_spectrogram(voltages, voltages, max_amp)
+    Plots.like_spectrogram(voltages, voltages, pulse_width)
+
+
+    # Plots.maps(voltages, voltages, pulse_width)
+    # exp.experiment_end()
