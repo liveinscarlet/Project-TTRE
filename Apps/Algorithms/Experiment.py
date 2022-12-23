@@ -5,14 +5,6 @@ import pyvisa
 import time
 from AgilentDCAX import OscilloscopeAgilent86100D
 from Rigol import PURigol
-from DataProcessing import Plots
-
-waveform = []  # Signal from the oscilloscope
-time_dom = []  # x axes
-amplitude = []  # y axes
-max_amp = []  # Meanings of the amplitudes of the pulses
-pulse_width = []  # Array of pulses width
-
 
 class Experiment(object):
     def __init__(self,
@@ -77,20 +69,6 @@ class Experiment(object):
         while st:
             st = ampl[index_stop] > level
             index_stop += 1
-
-        # time_start = 0
-        # for i, a in enumerate(ampl, start=0):
-        #     if a > level and time_start == 0:
-        #         time_start = time[i]
-        #         break
-        #
-        # rev_ampl = list(reversed(ampl))
-        # time_stop = 0
-        # for i, a in enumerate(rev_ampl, start=0):
-        #     if a > level and time_stop == 0:
-        #         time_stop = time[-i]
-        #         break
-
         dur = time[index_stop] - time[index_start]
         return dur
 
@@ -100,39 +78,58 @@ class Experiment(object):
 
 
 if __name__ == "__main__":
+    # Resource managers for VISA communication
     rm1 = pyvisa.ResourceManager()
     rm2 = pyvisa.ResourceManager()
     rm = pyvisa.ResourceManager()
+
+    # Creation of the objects for classes
     osc = OscilloscopeAgilent86100D(rm1, 'TCPIP0::192.168.1.5::inst0::INSTR')
     pu = PURigol(rm2, 'TCPIP0::192.168.1.227::inst0::INSTR')
     exp = Experiment(rm)
     osc.def_setup()
+
+    # Creation of the arrays and variables
     time_pulse = exp.time()
     ampl = exp.ampl()
-    voltages = np.arange(5, 28, 0.3)
-    max_amp_full = np.array(5)
+
+    # Voltage settings
+    v_max = 28
+    v_min = 5
+    step = 0.3
+    voltages = np.arange(v_min, v_max, step)
+
     size_zer = (len(voltages)+1, len(voltages)+1)
     max_amp = np.zeros(size_zer)
     pulse_width = np.zeros(size_zer)
     pulse_width_full01 = np.zeros(size_zer)
     pulse_width_short07 = np.zeros(size_zer)
     time_max_ampl = np.zeros(size_zer)
-    i, j = 0, 0
 
+    # index declaration
+    i, j = 0, 0
     ind_i = 0
     ind_j = 0
+
+    # Experimental cycle
     for i in voltages:
         pu.v_change_1(i)
         for j in voltages:
             pu.v_change_2(j)
             time.sleep(0.5)
+
+            # Data extraction
             ampl = exp.ampl()
             times = exp.time()
             timemax_coordinate = times[ampl.index(min(ampl))]
+
+            # Dynamic range of time
             if min(ampl) >= -0.5:
                 osc.def_setup()
             else:
                 osc.timebase_change(timemax_coordinate)
+
+            # Results calculation
             duration2 = exp.time_meas(times, ampl, is_positive=False)
             max_amp[ind_i][ind_j] = min(ampl)
             pulse_width[ind_i][ind_j] = duration2
@@ -140,8 +137,12 @@ if __name__ == "__main__":
             pulse_width_short = exp.time_meas(times, ampl, 0.7, is_positive=False)
             pulse_width_full01[ind_i][ind_j] = pulse_width_full
             pulse_width_short07[ind_i][ind_j] = pulse_width_short
+
+            # Save waveforms
             np.savetxt(f"waveform_V1{i}_V2{j}.csv", ampl, delimiter=",")
             np.savetxt(f"times_V1{i}_V2{j}.csv", times, delimiter=",")
+
+            # Check print
             print(f"Imp[{ind_i}][{ind_j}] on V1={i};V2={j} "
                   f"have amp={max_amp[ind_i][ind_j]:.1f}V;"
                   f"dur={pulse_width[ind_i][ind_j]*1e9:.3f}ns; "

@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
+# Default params of the plots
 plt.rcParams['font.family'] = 'Times New Roman'
 plt.rc('font', size=40)
 
@@ -50,38 +51,38 @@ class Plots(object):
         ax1.pcolormesh(V1, -V2, amples, cmap="jet")
         ax1.set_title("UWB pulse amplitudes", font="Times New Roman", fontsize=70)
         if is_positive:
-            ax1.set_xlabel("V1, накачка, В", font="Times New Roman", fontsize=40)
-            ax1.set_ylabel("V2, рассасывание, В", font="Times New Roman", fontsize=40)
+            ax1.set_xlabel("V1, накачка, В", font="Times New Roman", fontsize=60)
+            ax1.set_ylabel("V2, рассасывание, В", font="Times New Roman", fontsize=60)
         else:
-            ax1.set_xlabel("V1, рассасывание, В", font="Times New Roman", fontsize=40)
-            ax1.set_ylabel("V2, накачка, В", font="Times New Roman", fontsize=40)
+            ax1.set_xlabel("V1, рассасывание, В", font="Times New Roman", fontsize=60)
+            ax1.set_ylabel("V2, накачка, В", font="Times New Roman", fontsize=60)
 
         fig.colorbar(mappable=ax2.pcolormesh(V1, -V2, width * 10 ** 12, cmap="jet", vmax=220, vmin=150))
         ax2.set_title("UWB pulse width, level = 0.5", font="Times New Roman", fontsize=70)
         if is_positive:
-            ax2.set_xlabel("V1, накачка, В", font="Times New Roman", fontsize=40)
-            ax2.set_ylabel("V2, рассасывание, В", font="Times New Roman", fontsize=40)
+            ax2.set_xlabel("V1, накачка, В", font="Times New Roman", fontsize=60)
+            ax2.set_ylabel("V2, рассасывание, В", font="Times New Roman", fontsize=60)
         else:
-            ax2.set_xlabel("V1, рассасывание, В", font="Times New Roman", fontsize=40)
-            ax2.set_ylabel("V2, накачка, В", font="Times New Roman", fontsize=40)
+            ax2.set_xlabel("V1, рассасывание, В", font="Times New Roman", fontsize=60)
+            ax2.set_ylabel("V2, накачка, В", font="Times New Roman", fontsize=60)
 
         fig.colorbar(mappable=ax3.pcolormesh(V1, -V2, abs(width01 * 10 ** 12), cmap="jet", vmin=200, vmax=650))
         ax3.set_title("UWB pulse width, level = 0.1", font="Times New Roman", fontsize=70)
         if is_positive:
-            ax3.set_xlabel("V1, накачка, В", font="Times New Roman", fontsize=40)
-            ax3.set_ylabel("V2, рассасывание, В", font="Times New Roman", fontsize=40)
+            ax3.set_xlabel("V1, накачка, В", font="Times New Roman", fontsize=60)
+            ax3.set_ylabel("V2, рассасывание, В", font="Times New Roman", fontsize=60)
         else:
-            ax3.set_xlabel("V1, рассасывание, В", font="Times New Roman", fontsize=40)
-            ax3.set_ylabel("V2, накачка, В", font="Times New Roman", fontsize=40)
+            ax3.set_xlabel("V1, рассасывание, В", font="Times New Roman", fontsize=60)
+            ax3.set_ylabel("V2, накачка, В", font="Times New Roman", fontsize=60)
 
         fig.colorbar(mappable=ax4.pcolormesh(V1, -V2, width07 * 10 ** 12, cmap="jet", vmax=150, vmin=90))
         ax4.set_title("UWB pulse width, level = 0.7", font="Times New Roman", fontsize=70)
         if is_positive:
-            ax4.set_xlabel("V1, накачка, В", font="Times New Roman", fontsize=40)
-            ax4.set_ylabel("V2, рассасывание, В", font="Times New Roman", fontsize=40)
+            ax4.set_xlabel("V1, накачка, В", font="Times New Roman", fontsize=60)
+            ax4.set_ylabel("V2, рассасывание, В", font="Times New Roman", fontsize=60)
         else:
-            ax4.set_xlabel("V1, рассасывание, В", font="Times New Roman", fontsize=40)
-            ax4.set_ylabel("V2, накачка, В", font="Times New Roman", fontsize=40)
+            ax4.set_xlabel("V1, рассасывание, В", font="Times New Roman", fontsize=60)
+            ax4.set_ylabel("V2, накачка, В", font="Times New Roman", fontsize=60)
         plt.show()
         # plt.savefig("Full results")
 
