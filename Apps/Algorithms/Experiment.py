@@ -3,8 +3,8 @@ from numpy import arange
 import numpy as np
 import pyvisa
 import time
-from AgilentDCAX import OscilloscopeAgilent86100D
-from Rigol import PURigol
+from Apps.InstrumentControl.AgilentDCAX import OscilloscopeAgilent86100D
+from Apps.InstrumentControl.Rigol import PURigol
 
 class Experiment(object):
     def __init__(self,
@@ -20,11 +20,19 @@ class Experiment(object):
         self.ocs.def_setup()
 
     def ampl(self):
-        ampl = self.ocs.GetYData()
+        """
+    Extracts Y-samples from the oscilloscope
+        :return: np.array with Y-samples
+        """
+        ampl = self.ocs.get_y_data()
         return ampl
 
     def time(self):
-        time_pulse = self.ocs.GetXdata()
+        """
+    Extracts X-samples from the oscilloscope
+        :return: np.array with X-samples
+        """
+        time_pulse = self.ocs.get_x_data()
         return time_pulse
 
     def voltage_change(self,
@@ -39,21 +47,34 @@ class Experiment(object):
             self.pu.v_change_1(i)
             for j in voltages:
                 self.pu.v_change_2(j)
-                values = self.ocs.GetYData()
+                values = self.ocs.get_y_data()
                 ampl[i, j] = max(values)
                 pass
         return voltages, ampl
 
     @staticmethod
     def voltage_meas(voltages):
+        """
+    Finds amplitude of the pulse
+        :param voltages: array of voltages from the oscilloscope
+        :return: amplitude of the pulse, float
+        """
         volt = max(voltages)
         return volt
 
     def time_meas(self,
-                  time_pulse,
-                  ampl_pulse,
+                  time_pulse: np.array,
+                  ampl_pulse: np.array,
                   threshold: float = 0.5,
                   is_positive: bool = True):
+        """
+    Measures width if the pulse
+        :param time_pulse: X-data samples
+        :param ampl_pulse: Y-data samples
+        :param threshold: threshold of the amplitude of the pulse to measure width
+        :param is_positive: sets polarity of the pulse
+        :return: width of the pulse, float
+        """
         ampl = [x if is_positive else -x for x in ampl_pulse]
         index_start = np.argmax(ampl)
         index_stop = np.argmax(ampl)
@@ -73,6 +94,9 @@ class Experiment(object):
         return dur
 
     def experiment_end(self):
+        """
+    Turns everything off
+        """
         self.pu.end_of_work()
         self.ocs.Reset()
 

@@ -9,6 +9,12 @@ plt.rc('font', size=40)
 class Plots(object):
     @staticmethod
     def maps(x, y, z):
+        """
+    Plots 3D-surface
+        :param x: x-axes
+        :param y: y-axes
+        :param z: z-axes
+        """
         fig = plt.figure()
         ax = fig.add_subplot(111, projection='3d')
         plt.grid(True, which='major')
@@ -20,6 +26,11 @@ class Plots(object):
 
     @staticmethod
     def plot_waveform(x, y):
+        """
+    Plots a waveform from the oscilloscope
+        :param x: time samples
+        :param y: amplitude samples
+        """
         plt.plot(x, y)
         plt.grid(True, which='major')
         plt.grid(True, which='minor')
@@ -32,6 +43,13 @@ class Plots(object):
     @staticmethod
     def like_spectrogram(V1, V2, amples,
                          is_positive: bool = True):
+        """
+    Plots an RGB pic with voltages and amplitude of the pulse
+        :param V1: voltage on the first channel of the PU
+        :param V2: voltage pn the second channel of the PU
+        :param amples: measured amplitudes of the pulses
+        :param is_positive: sets polarity of the pulse
+        """
         fig, ax = plt.subplots()
         ax.pcolormesh(V1, -V2, amples, cmap="gist_gray")
         fig.colorbar(mappable=ax.pcolormesh(V1, -V2, amples, cmap="jet"))
@@ -46,6 +64,16 @@ class Plots(object):
     @staticmethod
     def exp_plot (V1, V2, amples, width, width01, width07,
                       is_positive: bool = True):
+        """
+    Plots not only pic for amplitudes, but also for width with different thresholds
+        :param V1: voltage on the first channel of the PU
+        :param V2: voltage pn the second channel of the PU
+        :param amples: measured amplitudes of the pulses
+        :param width: measured width of the pulses, threshold = 0.5
+        :param width01: measured width of the pulses, threshold = 0.1
+        :param width07: measured width of the pulses, threshold = 0.7
+        :param is_positive: sets polarity of the pulse
+        """
         fig, ((ax1, ax2) , (ax3, ax4)) = plt.subplots(2, 2, figsize=(40, 32))
         fig.colorbar(mappable=ax1.pcolormesh(V1, -V2, amples, cmap="jet", vmax=-6))
         ax1.pcolormesh(V1, -V2, amples, cmap="jet")

@@ -20,23 +20,23 @@ class OscilloscopeAgilent86100D(object):
         """
         return self.myOsc.query(":WAV:PRE?")
 
-    def dataExtraction(self) -> str:
+    def data_extraction(self) -> str:
         """
         Extracts amplitude samples from the oscilloscope. Not parsed
         :return: amplitude samples
         """
         return self.myOsc.query(":WAVeform:DATA?")
 
-    def GetYData(self) -> list[float]: # Form array of amplitudes
+    def get_y_data(self) -> list[float]: # Form array of amplitudes
         """
         Parse and form array of amplitude samples from dara, extracted by dataExtraction
         :return: np.array with amplitude samples
         """
-        data_string = self.dataExtraction()
+        data_string = self.data_extraction()
         data_list = data_string.split(sep=',')
         return [float(x) for x in data_list]
 
-    def GetXdata(self) -> list[float]: # Form array of time
+    def get_x_data(self) -> list[float]: # Form array of time
         """
         Forms array of time samples with data, axtracted by @Preamble
         :return: np.arrau with time samples
@@ -51,7 +51,7 @@ class OscilloscopeAgilent86100D(object):
 
         return list(np.linspace(start_time, time_end, points))
 
-    def AmpWidth(self):
+    def amp_width(self):
         """
         Calculation of amplitude and width of the pulse by the oscilloscope`s methods
         :return: float amplitude and float width
@@ -70,7 +70,7 @@ class OscilloscopeAgilent86100D(object):
         """
         Plots the waveform from the oscilloscope and shows it on the screen
         """
-        plt.plot(self.GetYData(), self.GetXdata())
+        plt.plot(self.get_y_data(), self.get_x_data())
         plt.grid(True)
         plt.grid(b=True, which='minor')
         plt.xlabel('Time, sec')
@@ -93,25 +93,12 @@ class OscilloscopeAgilent86100D(object):
         self.myOsc.write(":TIMEBASE:DELAY 30E-9")
         self.myOsc.write(":TIMEBASE:REFERENCE CENTER ")
 
-    def timebase_change(self, timemax_coord):
+    def timebase_change(self, timemax_coord: float):
         """
         Dynamic change of the time delay
+        :type timemax_coord: float
         :param timemax_coord: time of the max value of the pulse
         """
         self.myOsc.write(":TIMEBASE:RANGE 2E-9")  # Time range full scale 10ns
         self.myOsc.write(f":TIMEBASE:DELAY {timemax_coord + 0.5E-9}")
-
-if __name__ == '__main__':
-    rm = pyvisa.ResourceManager()
-    Agil = OscilloscopeAgilent86100D(rm, 'TCPIP0::192.168.1.5::inst0::INSTR')
-    Agil.def_setup()
-
-    # plt.plot(time, waveform)
-    # plt.grid(True)
-    # plt.grid(b = True, which='minor')
-    # plt.xlabel('Time, sec')
-    # plt.ylabel('Amplitude, V')
-    # plt.title('Waveform')
-    # plt.show()
-
 
