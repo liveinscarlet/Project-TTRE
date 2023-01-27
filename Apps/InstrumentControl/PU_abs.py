@@ -1,4 +1,4 @@
-from abc import *
+from abc import ABC, abstractmethod
 import pyvisa
 
 
@@ -13,12 +13,6 @@ class PowerUnit(ABC):
     def reset(self):
         # Reset of the Power Unit
         pass
-
-    # @abstractmethod
-    # def idn(self) -> str:
-    #     # Ask for IDN, check of the connection
-    #     idn = self.inst.query('*IDN?')
-    #     return idn
 
     @abstractmethod
     def default_setup_ch1(self):
