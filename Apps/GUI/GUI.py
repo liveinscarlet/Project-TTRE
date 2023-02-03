@@ -1,10 +1,9 @@
 import pyvisa
-from tkinter import *
-from tkinter.ttk import *
-from ttkthemes import ThemedStyle
-from Rigol import PURigol, PUGW_Instek
-from Experiment import Experiment
-from AgilentDCAX import OscilloscopeAgilent86100D
+import tkinter as tk
+import ttkthemes as ttk
+from Apps.InstrumentControl.Rigol import PURigol
+from Apps.Algorithms.Experiment import Experiment
+from Apps.InstrumentControl.AgilentDCAX import OscilloscopeAgilent86100D
 
 # Create resource managers
 rm1 = pyvisa.ResourceManager()
@@ -17,10 +16,10 @@ rm = pyvisa.ResourceManager()
 # GWInstek = PUGW_Instek(rm2)
 
 # The application design
-window = Tk()
+window = tk.Tk()
 window.title("Измерение параметров СКИ")
 window.geometry("800x500")
-style = ThemedStyle(window)
+style = ttk.ThemedStyle(window)
 print(style.theme_names())
 style.set_theme("arc")
 
