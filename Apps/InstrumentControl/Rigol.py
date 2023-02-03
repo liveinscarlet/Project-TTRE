@@ -1,12 +1,9 @@
 from abc import abstractmethod, ABC
 import pyvisa
 import time
-from PU_abs import PowerUnit
 
-class PURigol(PowerUnit):
+class PURigol(object):
     def __init__(self, visa_manager: pyvisa.ResourceManager, addr: str = 'TCPIP0::192.168.1.227::inst0::INSTR'):
-        # super().__init__(visa_manager, addr)
-        super().__init__(visa_manager, addr)
         self.myPU = visa_manager.open_resource(addr)
         print(self.myPU.query("*IDN?"))
 

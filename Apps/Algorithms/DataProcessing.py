@@ -75,8 +75,8 @@ class Plots(object):
         :param is_positive: sets polarity of the pulse
         """
         fig, ((ax1, ax2) , (ax3, ax4)) = plt.subplots(2, 2, figsize=(40, 32))
-        fig.colorbar(mappable=ax1.pcolormesh(V1, -V2, amples, cmap="jet", vmax=-6))
-        ax1.pcolormesh(V1, -V2, amples, cmap="jet")
+        fig.colorbar(mappable=ax1.pcolormesh(-V1, V2, amples, cmap="jet"))
+        ax1.pcolormesh(-V1, V2, amples, cmap="jet")
         ax1.set_title("UWB pulse amplitudes", font="Times New Roman", fontsize=70)
         if is_positive:
             ax1.set_xlabel("V1, накачка, В", font="Times New Roman", fontsize=60)
@@ -85,7 +85,7 @@ class Plots(object):
             ax1.set_xlabel("V1, рассасывание, В", font="Times New Roman", fontsize=60)
             ax1.set_ylabel("V2, накачка, В", font="Times New Roman", fontsize=60)
 
-        fig.colorbar(mappable=ax2.pcolormesh(V1, -V2, width * 10 ** 12, cmap="jet", vmax=220, vmin=150))
+        fig.colorbar(mappable=ax2.pcolormesh(-V1, V2, width * 10 ** 12, cmap="jet", vmax=170, vmin=100))
         ax2.set_title("UWB pulse width, level = 0.5", font="Times New Roman", fontsize=70)
         if is_positive:
             ax2.set_xlabel("V1, накачка, В", font="Times New Roman", fontsize=60)
@@ -94,7 +94,7 @@ class Plots(object):
             ax2.set_xlabel("V1, рассасывание, В", font="Times New Roman", fontsize=60)
             ax2.set_ylabel("V2, накачка, В", font="Times New Roman", fontsize=60)
 
-        fig.colorbar(mappable=ax3.pcolormesh(V1, -V2, abs(width01 * 10 ** 12), cmap="jet", vmin=200, vmax=650))
+        fig.colorbar(mappable=ax3.pcolormesh(-V1, V2, abs(width01 * 10 ** 12), cmap="jet", vmin=80, vmax=110))
         ax3.set_title("UWB pulse width, level = 0.1", font="Times New Roman", fontsize=70)
         if is_positive:
             ax3.set_xlabel("V1, накачка, В", font="Times New Roman", fontsize=60)
@@ -103,7 +103,7 @@ class Plots(object):
             ax3.set_xlabel("V1, рассасывание, В", font="Times New Roman", fontsize=60)
             ax3.set_ylabel("V2, накачка, В", font="Times New Roman", fontsize=60)
 
-        fig.colorbar(mappable=ax4.pcolormesh(V1, -V2, width07 * 10 ** 12, cmap="jet", vmax=150, vmin=90))
+        fig.colorbar(mappable=ax4.pcolormesh(-V1, V2, width07 * 10 ** 12, cmap="jet", vmax=450, vmin=90))
         ax4.set_title("UWB pulse width, level = 0.7", font="Times New Roman", fontsize=70)
         if is_positive:
             ax4.set_xlabel("V1, накачка, В", font="Times New Roman", fontsize=60)
@@ -116,19 +116,19 @@ class Plots(object):
 
 
 if __name__ == "__main__":
-    data1 = pd.read_csv('width_array0.csv', sep=r'\s*,\s*', header=0, encoding='utf8', engine='python')
-    data2 = pd.read_csv('amplitudes_array0.csv', sep=r'\s*,\s*', header=0, encoding='utf8', engine='python')
-    data3 = pd.read_csv('pulse_width_full010.csv', sep=r'\s*,\s*', header=0, encoding='utf8', engine='python')
-    data4 = pd.read_csv('pulse_width_short070.csv', sep=r'\s*,\s*', header=0, encoding='utf8', engine='python')
-    times = pd.read_csv(r"D:\Учеба\ТТРЭ\Project\Project-TTRE\Apps\Waveforms\times_V115.0_V211.0.csv", sep=r'\s*,\s*', header=0, encoding='utf8', engine='python')
-    amples = pd.read_csv(r"D:\Учеба\ТТРЭ\Project\Project-TTRE\Apps\Waveforms\waveform_V115.0_V211.0.csv", sep=r'\s*,\s*', header=0, encoding='utf8', engine='python')
+    data1 = pd.read_csv(fr'C:\Projects\Project-TTRE\Apps\Waveforms\Neg_3SRD\ampls.csv', sep=r'\s*,\s*', header=0, encoding='utf8', engine='python')
+    data2 = pd.read_csv(fr'C:\Projects\Project-TTRE\Apps\Waveforms\Neg_3SRD\width.csv', sep=r'\s*,\s*', header=0, encoding='utf8', engine='python')
+    data3 = pd.read_csv(fr'C:\Projects\Project-TTRE\Apps\Waveforms\Neg_3SRD\width_long.csv', sep=r'\s*,\s*', header=0, encoding='utf8', engine='python')
+    data4 = pd.read_csv(fr'C:\Projects\Project-TTRE\Apps\Waveforms\Neg_3SRD\width_short.csv', sep=r'\s*,\s*', header=0, encoding='utf8', engine='python')
+    # times = pd.read_csv(r"D:\Учеба\ТТРЭ\Project\Project-TTRE\Apps\Waveforms\times_V115.0_V211.0.csv", sep=r'\s*,\s*', header=0, encoding='utf8', engine='python')
+    # amples = pd.read_csv(r"D:\Учеба\ТТРЭ\Project\Project-TTRE\Apps\Waveforms\waveform_V115.0_V211.0.csv", sep=r'\s*,\s*', header=0, encoding='utf8', engine='python')
 
-    width = data1.to_numpy()
-    amplitudes = data2.to_numpy()
+    width = data2.to_numpy()
+    amplitudes = data1.to_numpy()
     width01 = data3.to_numpy()
     width07 = data4.to_numpy()
-    x = np.arange(5, 28.3, 0.3)
-    y = np.arange(5, 28, 0.3)
+    x = np.arange(8, 28.25, 0.25)
+    y = np.arange(8, 28, 0.25)
     # plt.plot(times, amples)
     # plt.grid(True, which="major", color='k')
     # plt.grid(True, which="minor", color='k')

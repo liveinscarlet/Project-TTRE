@@ -59,7 +59,7 @@ class Experiment(object):
         :param voltages: array of voltages from the oscilloscope
         :return: amplitude of the pulse, float
         """
-        volt = max(voltages)
+        volt = min(voltages)
         return volt
 
     def time_meas(self,
@@ -85,11 +85,17 @@ class Experiment(object):
         while st:
             st = ampl[index_start] > level
             index_start -= 1
+            if index_start == 0:
+                index_start = 2
+                break
 
         st = True
         while st:
             st = ampl[index_stop] > level
             index_stop += 1
+            if index_stop == len(ampl):
+                index_stop = len(ampl) - 2
+                break
         dur = time[index_stop] - time[index_start]
         return dur
 
@@ -119,8 +125,8 @@ if __name__ == "__main__":
 
     # Voltage settings
     v_max = 28
-    v_min = 5
-    step = 0.3
+    v_min = 8
+    step = 0.25
     voltages = np.arange(v_min, v_max, step)
 
     size_zer = (len(voltages)+1, len(voltages)+1)
@@ -148,7 +154,7 @@ if __name__ == "__main__":
             timemax_coordinate = times[ampl.index(min(ampl))]
 
             # Dynamic range of time
-            if min(ampl) >= -0.5:
+            if min(ampl) >= -0.2:
                 osc.def_setup()
             else:
                 osc.timebase_change(timemax_coordinate)
@@ -163,8 +169,8 @@ if __name__ == "__main__":
             pulse_width_short07[ind_i][ind_j] = pulse_width_short
 
             # Save waveforms
-            np.savetxt(f"waveform_V1{i}_V2{j}.csv", ampl, delimiter=",")
-            np.savetxt(f"times_V1{i}_V2{j}.csv", times, delimiter=",")
+            np.savetxt(fr"C:\Projects\Project-TTRE\Apps\Waveforms\Neg_3SRD\amplsV{[i]}_V{j}.csv", ampl, delimiter=",")
+            np.savetxt(fr"C:\Projects\Project-TTRE\Apps\Waveforms\Neg_3SRD\times_V1{i}_V2{j}.csv", times, delimiter=",")
 
             # Check print
             print(f"Imp[{ind_i}][{ind_j}] on V1={i};V2={j} "
@@ -178,8 +184,8 @@ if __name__ == "__main__":
         ind_i += 1
 
     # Save data
-    np.savetxt(f"amplitudes_array.csv", max_amp, delimiter=",")
-    np.savetxt(f"width_array.csv", pulse_width, delimiter=",")
-    np.savetxt(f"pulse_width_full01.csv", pulse_width_full01, delimiter=",")
-    np.savetxt(f"pulse_width_short07.csv", pulse_width_short07, delimiter=",")
-    np.savetxt(f"time_max_ampl.csv", time_max_ampl, delimiter=",")
+    np.savetxt(r"C:\Projects\Project-TTRE\Apps\Waveforms\Neg_3SRD\ampls.csv", max_amp, delimiter=",")
+    np.savetxt(r"C:\Projects\Project-TTRE\Apps\Waveforms\Neg_3SRD\width.csv", pulse_width, delimiter=",")
+    np.savetxt(r"C:\Projects\Project-TTRE\Apps\Waveforms\Neg_3SRD\width_short.csv", pulse_width_full01, delimiter=",")
+    np.savetxt(r"C:\Projects\Project-TTRE\Apps\Waveforms\Neg_3SRD\width_long.csv", pulse_width_short07, delimiter=",")
+    np.savetxt(r"C:\Projects\Project-TTRE\Apps\Waveforms\Neg_3SRD\wtime_max_ampl.csv", time_max_ampl, delimiter=",")
