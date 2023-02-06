@@ -2,10 +2,6 @@ from abc import abstractmethod, ABC
 import pyvisa
 import time
 
-<<<<<<< HEAD
-=======
-
->>>>>>> 14ddb2dcd7ef3d2b7c8ee41b2030073fb292a82e
 class PURigol(object):
     def __init__(self, visa_manager: pyvisa.ResourceManager, addr: str = 'TCPIP0::192.168.1.227::inst0::INSTR'):
         self.myPU = visa_manager.open_resource(addr)
